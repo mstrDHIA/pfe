@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
@@ -525,8 +526,9 @@ def accept_order(request,pk):
     """
     List all code snippets, or create a new snippet.
     """
+
     try:
-        order = Order().objects.filter(id=pk)
+        order = Order.objects.get(pk=pk)
     except Order().DoesNotExist:
         return HttpResponse(status=404)
     if request.method == 'PUT':
@@ -534,11 +536,52 @@ def accept_order(request,pk):
         data = JSONParser().parse(request)
         print(data)
         serializer = OrderSerializer(order, data=data)
+
         #serializer.data
         if serializer.is_valid():
+            serializer.validated_data["state"] = "delivering"
+            print(serializer.validated_data["state"])
+            serializer.validated_data["accept_time"] = datetime.now(timezone.utc)
+
             serializer.save()
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors, status=400)
+
+
+
+@csrf_exempt
+def confirm_order(request,pk):
+    """
+    List all code snippets, or create a new snippet.
+    """
+
+    try:
+        order = Order.objects.get(pk=pk)
+    except Order().DoesNotExist:
+        return HttpResponse(status=404)
+    if request.method == 'PUT':
+
+        data = JSONParser().parse(request)
+        print(data)
+        serializer = OrderSerializer(order, data=data)
+
+        #serializer.data
+        if serializer.is_valid():
+            serializer.validated_data["state"] = "delivered"
+            print(serializer.validated_data["state"])
+            #now.strftime("%d/%m/%Y %H:%M:%S")
+            serializer.validated_data["delivery_time"] = datetime.now(timezone.utc)
+          #  serializer.validated_data["delivery_time"] = datetime.now()
+            print(serializer.validated_data["delivery_time"]-serializer.validated_data["accept_time"])
+            t=serializer.validated_data["accept_time"]-serializer.validated_data["delivery_time"]
+            period=t.total_seconds()/60
+            serializer.validated_data["delivery_durations"]=str(period)
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+
+
 
 permission_classes = (IsAuthenticated,)
 @csrf_exempt
