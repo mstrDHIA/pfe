@@ -232,6 +232,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.id_user = validated_data.get('id_user', instance.id_user)
         instance.age = validated_data.get('age', instance.age)
         instance.sex = validated_data.get('sex', instance.sex)
+        instance.phone = validated_data.get('phone', instance.phone)
 
 
         return instance

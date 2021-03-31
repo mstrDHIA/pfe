@@ -80,9 +80,9 @@ class Order_Items(models.Model):
 class Profile(models.Model):
     USER = get_user_model()
     id_user = models.ForeignKey(USER, on_delete=models.SET('unknown'))
-    age = models.IntegerField(default=0)
-    sex = models.CharField(max_length=10)
-
+    age = models.IntegerField(default=0,null=True)
+    sex = models.CharField(max_length=10,null=True)
+    phone=models.IntegerField(max_length=12,null=True)
 
 
 

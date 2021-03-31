@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -261,7 +263,7 @@ def seller_detail(request, pk):
         return HttpResponse(status=404)
 
     if request.method == 'GET':
-        serializer =    SellerSerializer(sellertype)
+        serializer =   SellerSerializer(seller)
         return JsonResponse(serializer.data)
 
     elif request.method == 'PUT':
@@ -336,6 +338,7 @@ def profile_list(request):
             serializer.save()
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
+
 
 @csrf_exempt
 def profile_detail(request, pk):
@@ -433,9 +436,10 @@ def available_orders(request):
                 sellerserializer = SellerSerializer(seller[0], many=False)
                 s=sellerserializer.data
                 intermediateresult.append(s)
-                payement_methods = Payement_Methods.objects.filter(id=order[i].id_payement_methods_id)
-                PayementMethodSerializer = PayementMethodSerializer(payement_methods[0], many=False)
-                p = PayementMethodSerializer.data
+                payement_methods = Payement_Methods.objects.filter(id=order[i].id_payement_id)
+                payementserializer = PayementMethodSerializer(payement_methods[0], many=False)
+                p = payementserializer.data
+
                 intermediateresult.append(p)
 
                 orderitems = Order_Items.objects.all().filter()
@@ -548,3 +552,32 @@ class HelloView(APIView):
     def get(self, request):
         content = {'message': 'Hello, World!'}
         return Response(content)
+
+
+
+
+@csrf_exempt
+def create_new_user(request):
+    if request.method == 'POST':
+        print(request)
+        data = JSONParser().parse(request)
+        print(data)
+        serializer = UserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+
+            x={
+                "id_user":serializer.data["id"]
+            }
+            data=json.dumps(x)
+            print(data)
+            proser = ProfileSerializer(data=x)
+            if proser.is_valid():
+                proser.save()
+                return JsonResponse(proser.data, status=201)
+            print(proser.data)
+            return JsonResponse(proser.errors, status=400)
+
+
+           #return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
