@@ -30,5 +30,6 @@ urlpatterns = [
     path('hello/', views.HelloView.as_view(), name='hello'),
     path('create_account/', views.create_new_user),
     path('confirm_order/<int:pk>/', views.confirm_order),
+    path('user/<int:pk>/', views.user_detail)
 
 ]

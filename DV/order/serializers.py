@@ -22,10 +22,10 @@ class BuyerSerializer(serializers.ModelSerializer):
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.address = validated_data.get('address', instance.address)
-        instance.phone = validated_data.get('phone', instance.numtel)
-        instance.long = validated_data.get('long', instance.numtel)
-        instance.lat = validated_data.get('lat', instance.numtel)
-        instance.email = validated_data.get('email', instance.numtel)
+        instance.phone = validated_data.get('phone', instance.phone)
+        instance.long = validated_data.get('long', instance.long)
+        instance.lat = validated_data.get('lat', instance.lat)
+        instance.email = validated_data.get('email', instance.email)
 
         instance.save()
         return instance
@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = '__all__'
+        exclude = ('groups', 'user_permissions')
       #  exclude = ['password']
     def create(self, validated_data):
         """
@@ -185,7 +185,7 @@ class SellerSerializer(serializers.ModelSerializer):
         Update and return an existing `Snippet` instance, given the validated data.
         """
         instance.name = validated_data.get('name', instance.name)
-        instance.id_sellertype = validated_data.get('seller_type', instance.seller_type)
+        instance.id_sellertype = validated_data.get('id_sellertype', instance.id_sellertype)
         instance.address = validated_data.get('address', instance.address)
         instance.phone = validated_data.get('name', instance.phone)
         instance.email = validated_data.get('email', instance.email)
