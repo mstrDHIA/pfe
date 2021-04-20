@@ -1,3 +1,4 @@
+#from django.contrib.auth import get_user_model
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from .models import Buyer, Order, FeedBack, Block, Seller_Type, Seller, Payement_Methods, Profile, Order_Items
@@ -30,18 +31,48 @@ class BuyerSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class UserSerializer(serializers.ModelSerializer):
+
+class RegisterUserSerializer(serializers.ModelSerializer):
 
 
     class Meta:
-        model = get_user_model()
+
+        model = User
+
         exclude = ('groups', 'user_permissions')
+        extra_kwargs = {'password': {'write_only': True}}
+
+#       model = get_user_model()
+        #exclude = ('groups', 'user_permissions')
       #  exclude = ['password']
     def create(self, validated_data):
         """
         Create and return a new `Snippet` instance, given the validated data.
         """
-        return get_user_model().objects.create(**validated_data)
+        user = User.objects.create_user(validated_data['username'], validated_data['email'], validated_data['password'])
+
+        return user
+
+
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+
+ #       model = get_user_model()
+        model = User
+        exclude = ('groups', 'user_permissions')
+        extra_kwargs = {'password': {'write_only': True}}
+
+#  exclude = ['password']
+    def create(self, validated_data):
+        """
+        Create and return a new `Snippet` instance, given the validated data.
+        """
+
+        return User.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         """
@@ -233,6 +264,17 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.id_user = validated_data.get('id_user', instance.id_user)
         instance.age = validated_data.get('age', instance.age)
         instance.sex = validated_data.get('sex', instance.sex)
+        instance.address = validated_data.get('address', instance.address)
+
+        instance.country = validated_data.get('country', instance.country)
+        instance.governorate = validated_data.get('governorate', instance.governorate)
+        instance.city = validated_data.get('city', instance.city)
+        instance.lat = validated_data.get('lat', instance.lat)
+        instance.long = validated_data.get('long', instance.long)
+        instance.vehicle = validated_data.get('vehicle', instance.vehicle)
+        instance.state = validated_data.get('state', instance.state)
+        instance.photo = validated_data.get('photo', instance.photo)
+        #instance.image = validated_data.get('image', instance.image)
         instance.phone = validated_data.get('phone', instance.phone)
 
 

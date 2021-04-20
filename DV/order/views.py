@@ -1,13 +1,14 @@
 import json
 from datetime import datetime, timezone
+from rest_framework.decorators import api_view, parser_classes
 
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import FileUploadParser, JSONParser, FormParser, MultiPartParser
 from .models import Buyer, Order, FeedBack, Block, Seller_Type, Seller, Payement_Methods, Profile, Order_Items
-from .serializers import BuyerSerializer, OrderSerializer, FeedBackSerializer, BlockSerializer, SellerTypeSerializer, SellerSerializer, PayementMethodSerializer, ProfileSerializer, OrderItemSerializer, UserSerializer
+from .serializers import RegisterUserSerializer, BuyerSerializer, OrderSerializer, FeedBackSerializer, BlockSerializer, SellerTypeSerializer, SellerSerializer, PayementMethodSerializer, ProfileSerializer, OrderItemSerializer, UserSerializer
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
@@ -322,8 +323,27 @@ def payement_methods_detail(request, pk):
     elif request.method == 'DELETE':
         payement_methods.delete()
         return HttpResponse(status=204)
+
+
+# class ProfileView(APIView):
+#     parser_classes = (JSONParser,FormParser, MultiPartParser)
+#     def get(self, request, format=None):
+#         profile = Profile.objects.all()
+#         serializer = ProfileSerializer(profile, many=True)
+#         return JsonResponse(serializer.data, safe=False)
+#
+#     def post(self, request, format=None):
+#         #data = JSONParser().parse(request)
+#         data=request.data
+#         serializer = ProfileSerializer(data=data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return JsonResponse(serializer.data, status=201)
+#         return JsonResponse(serializer.errors, status=400)
 @csrf_exempt
-def profile_list(request):
+@api_view(['GET', 'POST'])
+@parser_classes([JSONParser,FormParser,MultiPartParser])
+def profile_list(request, *args, **kwargs):
     """
     List all code snippets, or create a new snippet.
     """
@@ -333,7 +353,8 @@ def profile_list(request):
         return JsonResponse(serializer.data, safe=False)
 
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
+        #data = JSONParser().parse(request)
+        data=request.data
         serializer = ProfileSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -341,8 +362,43 @@ def profile_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
+
+# class profile_detailsView(APIView):
+#     parser_classes = (JSONParser ,FormParser, MultiPartParser)
+#     def get_object(self, pk):
+#         try:
+#             profile = Profile.objects.get(pk=pk)
+#         except Profile.DoesNotExist:
+#             return HttpResponse(status=404)
+#
+#
+#     def get(self, request, pk, format=None):
+#         profile=self.get_object(pk)
+#         serializer = ProfileSerializer(profile)
+#         return JsonResponse(serializer.data)
+#
+#
+#     def put(self, request, pk, format=None):
+#         profile=self.get_object(pk)
+#
+#         data = request.data
+#
+#         serializer = ProfileSerializer(profile, data=data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return JsonResponse(serializer.data)
+#         return JsonResponse(serializer.errors, status=400)
+#
+#     def delete(self, request, pk, format=None):
+#         profile = self.get_object(pk)
+#         profile.delete()
+#         return HttpResponse(status=204)
+
 @csrf_exempt
+@api_view(['Get', 'Put', 'Delete'])
+@parser_classes([JSONParser,FormParser,MultiPartParser])
 def profile_detail(request, pk):
+
     """
     Retrieve, update or delete a code snippet.
     """
@@ -356,11 +412,14 @@ def profile_detail(request, pk):
         return JsonResponse(serializer.data)
 
     elif request.method == 'PUT':
-        data = JSONParser().parse(request)
+        data = request.data
         serializer = ProfileSerializer(profile, data=data)
+
         if serializer.is_valid():
             serializer.save()
+
             return JsonResponse(serializer.data)
+
         return JsonResponse(serializer.errors, status=400)
 
     elif request.method == 'DELETE':
@@ -467,13 +526,17 @@ def user_info(request,pk):
     """
     if request.method == 'GET':
         info=[]
-        user = get_user_model().objects.filter(id=pk)
+        user = User.objects.filter(id=pk)
         userserializer = UserSerializer(user, many=True)
-        profile = Profile.objects.filter(id=pk)
-        profileserializer = ProfileSerializer(profile, many=True)
-        info.append(userserializer.data)
-        info.append(profileserializer.data)
-        return JsonResponse(info, safe=False)
+
+        profile = Profile.objects.all()
+        for p in profile:
+            if(p.id_user_id==pk):
+
+                profileserializer = ProfileSerializer(p, many=False)
+                info.append(userserializer.data)
+                info.append(profileserializer.data)
+                return JsonResponse(info, safe=False)
 
 
 @csrf_exempt
@@ -567,13 +630,19 @@ def confirm_order(request,pk):
 
         #serializer.data
         if serializer.is_valid():
+            a=serializer.validated_data["state"]
             serializer.validated_data["state"] = "delivered"
             print(serializer.validated_data["state"])
-            #now.strftime("%d/%m/%Y %H:%M:%S")
+
             serializer.validated_data["delivery_time"] = datetime.now(timezone.utc)
-          #  serializer.validated_data["delivery_time"] = datetime.now()
-            print(serializer.validated_data["delivery_time"]-serializer.validated_data["accept_time"])
-            t=serializer.validated_data["accept_time"]-serializer.validated_data["delivery_time"]
+            a=serializer.validated_data["delivery_time"]
+            b=serializer.validated_data["accept_time"]
+            #c=serializer.data["accept_time"]
+
+            print(type(b))
+            #print(c)
+            #t=serializer.validated_data["delivery_time"]-serializer.validated_data["accept_time"]
+            t=a-b
             period=t.total_seconds()/60
             serializer.validated_data["delivery_durations"]=str(period)
             serializer.save()
@@ -595,6 +664,8 @@ class HelloView(APIView):
     def get(self, request):
         content = {'message': 'Hello, World!'}
         return Response(content)
+
+
 
 
 
@@ -624,3 +695,16 @@ def create_new_user(request):
 
            #return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
+
+
+
+@csrf_exempt
+def new_user(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = RegisterUserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+

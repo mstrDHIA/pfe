@@ -62,7 +62,9 @@ class Order(models.Model):
     delivery_time = models.DateTimeField(null=True, )
     delivery_durations = models.FloatField(null=True, )
     accept_time=models.DateTimeField(null=True)
+    
     order_time = models.DateTimeField()
+    
     order_type = models.CharField(max_length=20)
     is_paid = models.BooleanField()
     distance = models.FloatField()
@@ -80,9 +82,21 @@ class Order_Items(models.Model):
 
 class Profile(models.Model):
     USER = get_user_model()
-    id_user = models.ForeignKey(USER, on_delete=models.SET('unknown'))
+    id_user = models.ForeignKey(USER, on_delete=models.SET('unknown'),unique=True)
     age = models.IntegerField(default=0,null=True)
     sex = models.CharField(max_length=10,null=True)
+    address = models.CharField(max_length=50,null=True)
+
+    country = models.CharField(max_length=20,null=True)
+    governorate = models.CharField(max_length=20,null=True)
+    city = models.CharField(max_length=20,null=True)
+    state = models.CharField(max_length=10,null=True)
+    lat = models.CharField(max_length=20,null=True)
+    long = models.CharField(max_length=20,null=True)
+    photo = models.ImageField(null=True)
+    #Image = models.FileField(null=True)
+    vehicle = models.CharField(max_length=15,null=True)
+
     phone=models.IntegerField(max_length=12,null=True)
 
 
