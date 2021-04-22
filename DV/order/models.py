@@ -26,10 +26,12 @@ class FeedBack(models.Model):
 class Block(models.Model):
     USER = get_user_model()
     id_user = models.ForeignKey(USER, on_delete=models.SET('unknown'))
+    buyer_email=models.CharField(max_length=100,null=True)
     id_buyer = models.ForeignKey(Buyer, on_delete=models.SET('unknown'))
-    date = models.DateTimeField(default=datetime.now)
+    date = models.DateTimeField(null=True,default=datetime.now )
     blocker = models.CharField(max_length=20)
     reason = models.CharField(max_length=100)
+
 class Seller_Type(models.Model):
     name = models.CharField(max_length=10)
 

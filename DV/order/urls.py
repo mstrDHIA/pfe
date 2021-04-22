@@ -10,6 +10,9 @@ urlpatterns = [
     path('feedback/', views.feedback_list),
     path('feedback/<int:pk>/', views.feedback_detail),
     path('block/', views.block_list),
+    path('userblocks/<int:pk>/', views.user_blocks),
+    path('blocksdel/<int:pk>/<int:pk2>/', views.blocksdel),
+
     path('block/<int:pk>/', views.block_detail),
     path('sellertype/', views.sellertype_list),
     path('sellertype/<int:pk>/', views.sellertype_detail),

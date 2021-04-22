@@ -166,6 +166,33 @@ def block_list(request):
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
 
+
+@csrf_exempt
+def blocksdel(request, pk,pk2):
+    block=Block.objects.all()
+    if request.method=='DELETE':
+            for i in range(0,len(block),1):
+                if(block[i].id_user_id==pk):
+                    if(block[i].id_buyer_id==pk2):
+                        block[i].delete()
+                        return HttpResponse(status=204)
+
+
+@csrf_exempt
+def user_blocks(request, pk):
+    block=Block.objects.all()
+
+    if request.method=='GET':
+        blockslist=[]
+        for i in range(0,len(block),1):
+            if(block[i].id_user_id==pk):
+                blockslist.append(block[i])
+
+        serializer=BlockSerializer(blockslist,many=True)
+        return JsonResponse(serializer.data,safe=False)
+
+    
+
 @csrf_exempt
 def block_detail(request, pk):
     """
