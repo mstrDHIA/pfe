@@ -16,12 +16,18 @@ class Buyer(models.Model):
     lat=models.CharField(default="unknown",max_length=200)
     email=models.CharField(max_length=30)
 
+    def __str__(self):
+        return f"{self.last_name} {self.first_name}"
+
 class FeedBack(models.Model):
+    ordering = ("date")
+
     USER = get_user_model()
     id_user = models.ForeignKey(USER, on_delete=models.SET('unknown'))
     date = models.DateTimeField(default=datetime.now)
     object = models.CharField(max_length=30)
     message = models.CharField(max_length=2000)
+    verified=models.BooleanField(default=False)
 
 class Block(models.Model):
     USER = get_user_model()
@@ -43,10 +49,14 @@ class Seller (models.Model):
     email = models.CharField(max_length=30)
     long = models.CharField(default="unknown", max_length=200)
     lat = models.CharField(default="unknown", max_length=200)
+    def __str__(self):
+        return f"{self.name}"
 
 class Payement_Methods(models.Model):
     name = models.CharField(max_length=20)
     type = models.CharField(max_length=20)
+    def __str__(self):
+        return f"{self.name}"
 
 class Order(models.Model):
     USER = get_user_model()
@@ -61,7 +71,7 @@ class Order(models.Model):
     price = models.FloatField(default=0)
     stars = models.IntegerField(blank=True, null=True)
     review = models.CharField(max_length=200, null=True)
-    delivery_time = models.DateTimeField(null=True, )
+    delivery_time = models.DateTimeField(null=True,default=datetime.now )
     delivery_durations = models.FloatField(null=True, )
     accept_time=models.DateTimeField(null=True)
     
@@ -73,6 +83,9 @@ class Order(models.Model):
     order_duration = models.FloatField()
 
     state = models.CharField(default="pending", max_length=10)
+
+
+    
 
 
 class Order_Items(models.Model):
@@ -93,13 +106,17 @@ class Profile(models.Model):
     governorate = models.CharField(max_length=20,null=True)
     city = models.CharField(max_length=20,null=True)
     state = models.CharField(max_length=10,null=True)
-    lat = models.CharField(max_length=20,null=True)
-    long = models.CharField(max_length=20,null=True)
+    lat = models.CharField(max_length=20,null=True,blank=True)
+    long = models.CharField(max_length=20,null=True,blank=True)
     photo = models.ImageField(null=True)
     #Image = models.FileField(null=True)
     vehicle = models.CharField(max_length=15,null=True)
 
     phone=models.IntegerField(max_length=12,null=True)
+    delivered_orders=models.IntegerField(max_length=12,default=0,null= True)
+    stars=models.IntegerField(max_length=12,default=0,null= True)
+    profits=models.FloatField(max_length=12,default=0,null= True)
+    failed_orders=models.IntegerField(max_length=12,default=0,null= True)
 
 
 

@@ -36,5 +36,7 @@ urlpatterns = [
     path('user/<int:pk>/', views.user_detail),
     path('new_user/', views.new_user),
     path('user_info/<int:pk>/', views.user_info),
+    path('delivered_orders/<int:pk>/', views.getDeliveredOrders),
+
 
 ]

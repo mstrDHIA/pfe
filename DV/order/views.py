@@ -436,15 +436,18 @@ def profile_detail(request, pk):
 
     if request.method == 'GET':
         serializer = ProfileSerializer(profile)
+        print(serializer.data)
         return JsonResponse(serializer.data)
 
     elif request.method == 'PUT':
         data = request.data
-        serializer = ProfileSerializer(profile, data=data)
+        #data = JSONParser().parse(request)
+
+        serializer = ProfileSerializer(profile, data=data,partial=True)
 
         if serializer.is_valid():
             serializer.save()
-
+            print(serializer.data)
             return JsonResponse(serializer.data)
 
         return JsonResponse(serializer.errors, status=400)
@@ -600,7 +603,7 @@ def user_detail(request, pk):
 
     elif request.method == 'PUT':
         data = JSONParser().parse(request)
-        serializer = UserSerializer(user, data=data)
+        serializer = UserSerializer(user, data=data,partial=True)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data)
@@ -734,4 +737,74 @@ def new_user(request):
             serializer.save()
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
+
+
+@csrf_exempt
+def getDeliveredOrders(request,pk):
+    if request.method == 'GET':
+        order = Order.objects.all()
+        resultserializertab=[]
+        print(pk)
+        for i in range(0,len(order),1):
+            intermediateserializer=OrderSerializer(order[i],many=False)
+            print(intermediateserializer.data["id_user"])
+            #print(orders[i].id_user)
+            if intermediateserializer.data["id_user"]==pk:
+                print("got it")
+                if intermediateserializer.data["state"]=="delivered":
+                    intermediateresult=[]
+                orderserializer = OrderSerializer(order[i], many=False)
+                o=orderserializer.data
+                intermediateresult.append(o)
+
+
+                buyer = Buyer.objects.filter(id=order[i].id_buyer_id)
+                buyerserializer = BuyerSerializer(buyer[0], many=False)
+                b=buyerserializer.data
+                intermediateresult.append(b)
+
+                seller = Seller.objects.filter(id=order[i].id_seller_id)
+                sellerserializer = SellerSerializer(seller[0], many=False)
+                s=sellerserializer.data
+                intermediateresult.append(s)
+                payement_methods = Payement_Methods.objects.filter(id=order[i].id_payement_id)
+                payementserializer = PayementMethodSerializer(payement_methods[0], many=False)
+                p = payementserializer.data
+
+                intermediateresult.append(p)
+
+                orderitems = Order_Items.objects.all().filter()
+                print(orderitems)
+                items=[]
+                print(order[i].id)
+                for j in range(0, len(orderitems), 1):
+                    print(orderitems[j].id_order_id)
+                    print(orderitems[j].id_order_id==order[i].id)
+                    if(orderitems[j].id_order_id==order[i].id):
+                        print("l9itha")
+                        orderitemserializer = OrderItemSerializer(orderitems[j], many=False)
+                        oi = orderitemserializer.data
+                        items.append(oi)
+                intermediateresult.append(items)
+
+                resultserializertab.append(intermediateresult)
+    return JsonResponse(resultserializertab, safe=False)
+
+
+        
+        
+        #serializer = OrderSerializer(deliveredorders, many=True)
+
+        #return JsonResponse(deliveredorders, safe=False)
+
+
+# @csrf_exempt
+# def getstats(request):
+#     """
+#     List all code snippets, or create a new snippet.
+#     """
+#     if request.method == 'GET':
+#         order = Order.objects.all()
+#         serializer = OrderSerializer(order, many=True)
+#         return JsonResponse(serializer.data, safe=False)
 

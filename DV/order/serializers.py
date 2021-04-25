@@ -276,6 +276,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.photo = validated_data.get('photo', instance.photo)
         #instance.image = validated_data.get('image', instance.image)
         instance.phone = validated_data.get('phone', instance.phone)
+        instance.delivered_orders = validated_data.get('delivered_orders', instance.delivered_orders)
+        instance.failed_orders = validated_data.get('failed_orders', instance.failed_orders)
+        instance.stars = validated_data.get('stars', instance.stars)
+        instance.profits = validated_data.get('profits', instance.profits)
 
 
         return instance
